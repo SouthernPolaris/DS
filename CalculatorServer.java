@@ -6,12 +6,12 @@ public class CalculatorServer {
         try {
             Calculator myCalc = new CalculatorImplementation();
 
-            Registry registry = LocateRegistry.createRegistry(1099);
+            Registry registry = LocateRegistry.createRegistry(8080);
 
             registry.rebind("CalculatorDistributed", myCalc);
             System.out.println("Calculator server ready");
         } catch (Exception e) {
-            System.out.println("Error Creating Server");
+            System.err.println("Error Creating Server" + e);
             e.printStackTrace();
         }
     }

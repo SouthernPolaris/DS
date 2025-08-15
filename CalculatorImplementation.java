@@ -1,46 +1,95 @@
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.Stack;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.*;
 
-public class CalculatorImplementation implements Calculator {
+public class CalculatorImplementation extends UnicastRemoteObject implements Calculator {
 
-    public Stack<Integer> calcStack = new Stack<>();
+    private final Map<UUID, Stack<Integer>> clientStacks = new HashMap<UUID, Stack<Integer>>();
 
-    public void pushValue(int value) throws RemoteException {
-        calcStack.push(value);
+    private Stack<Integer> getStack(UUID clientId) {
+        return clientStacks.computeIfAbsent(clientId, id -> new Stack<>());
     }
 
-    public void pushOperation(String operation) throws RemoteException {
+    public CalculatorImplementation() throws RemoteException {
+        super();
+    }
 
+    public void pushValue(UUID clientID, int value) throws RemoteException {
+        Stack<Integer> stack = getStack(clientID);
+        stack.push(value);
+        System.out.println("[SERVER] - Client " + clientID + " pushed: " + value);
+    }
+
+    public void pushOperation(UUID clientID, String operation) throws RemoteException {
+        Stack<Integer> stack = getStack(clientID);
+        System.out.println("[SERVER] - Operation Called: " + operation);
         int res = 0;
 
         switch (operation) {
             case "min":
-                res = Math.min(res, calcStack.pop());
+                res = Integer.MAX_VALUE;
+
+                while (!stack.empty()) {
+                    res = Math.min(res, stack.pop());
+                }
+
                 break;
             case "max":
-                res = Math.max(res, calcStack.pop());
+                res = Integer.MIN_VALUE;
+
+                while (!stack.empty()) {
+                    res = Math.max(res, stack.pop());
+                }
+
+                break;
             case "gcd":
-                res = gcd(calcStack.pop(), res);
+                if (!stack.empty()) {
+                    res = stack.pop();
+
+                    while (!stack.empty()) {
+                        res = gcd(stack.pop(), res);
+                    }
+                }
+                break;
             case "lcm":
-                res = 0;
+//                res = 1;
+                if (!stack.empty()) {
+                    res = stack.pop();
+                    while (!stack.empty()) {
+                        int temp = stack.pop();
+                        res = Math.abs(temp * res) / gcd(temp, res);
+                    }
+                }
+                break;
         }
 
-        calcStack.push(res);
+        stack.push(res);
 
+        System.out.println("[SERVER] - Client " + clientID + " performed " + operation + "/ Res: " + res);
     }
 
-    public int pop() throws RemoteException {
-        return calcStack.pop();
+    public int pop(UUID clientID) throws RemoteException {
+        Stack<Integer> stack = getStack(clientID);
+        int toPop = stack.pop();
+        System.out.println("[SERVER] - Client " + clientID + " popping " + toPop + " from calculator");
+        return toPop;
     }
 
-    public boolean isEmpty() throws RemoteException {
-        return calcStack.isEmpty();
+    public boolean isEmpty(UUID clientID) throws RemoteException {
+        Stack<Integer> stack = getStack(clientID);
+        return stack.isEmpty();
     }
 
-    public int delayPop(int millis) throws RemoteException {
-        // TODO: add delay
-        return calcStack.pop();
+    public int delayPop(UUID clientID, int millis) throws RemoteException {
+        Stack<Integer> stack = getStack(clientID);
+        try {
+            Thread.sleep(millis);
+            System.out.println("[SERVER] - " + Thread.currentThread().getName() + " is going to sleep for " + millis + " milliseconds");
+        }
+        catch (InterruptedException e) {
+            throw new RemoteException("[SERVER] - Interruption", e);
+        }
+        return pop(clientID);
     }
 
     private int gcd(int a, int b) throws RemoteException {
@@ -50,17 +99,14 @@ public class CalculatorImplementation implements Calculator {
         return gcd(b, a % b);
     }
 
-    public int allGCD() throws RemoteException {
-        int res = calcStack.pop();
-        while (!calcStack.isEmpty()) {
-            res = gcd(res, calcStack.pop());
+    public void printStack(UUID clientID) throws RemoteException {
+        Stack<Integer> stack = getStack(clientID);
+        System.out.println("[SERVER] - Client " + clientID + " printing stack");
 
-            if (res == 1) {
-                return 1;
-            }
+        for (Integer integer : stack) {
+            System.out.println(integer);
         }
-
-        return res;
+        System.out.println();
     }
 
 }
