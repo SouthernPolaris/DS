@@ -139,6 +139,7 @@ public class TestCalcClient {
             }
         });
 
+
         Thread thr2 = new Thread(() -> {
            try {
                assertEquals(20, stub.delayPop(client_B_ID, 1000));
