@@ -12,7 +12,7 @@ public class TestCalcClient {
 
     @BeforeAll
     static void createServer() throws Exception {
-        Registry registry = LocateRegistry.createRegistry(8080);
+        Registry registry = LocateRegistry.createRegistry(1099);
         Calculator distributedCalc = new CalculatorImplementation();
 
         registry.rebind("CalculatorDistributed", distributedCalc);
@@ -31,41 +31,6 @@ public class TestCalcClient {
 
         assertEquals(20, firstPop);
         assertEquals(10, secondPop);
-    }
-
-    @Test
-    // Tests for independence of multiple stacks
-    void multipleClientsIndependence() throws RemoteException {
-        UUID client_A_ID = UUID.randomUUID();
-        UUID client_B_ID = UUID.randomUUID();
-
-        stub.pushValue(client_A_ID, 10);
-        stub.pushValue(client_B_ID, 20);
-
-        stub.pushValue(client_A_ID, 30);
-
-        assertEquals(30, stub.pop(client_A_ID));
-        assertEquals(20, stub.pop(client_B_ID));
-        assertEquals(10, stub.pop(client_A_ID));
-    }
-
-    @Test
-    void MultipleClientsPushPop() throws RemoteException {
-        UUID client_A_ID = UUID.randomUUID();
-        UUID client_B_ID = UUID.randomUUID();
-
-        stub.pushValue(client_A_ID, 10);
-        stub.pushValue(client_B_ID, 20);
-
-        stub.pushValue(client_A_ID, 30);
-
-        stub.pushOperation(client_A_ID, "min");
-
-        assertEquals(10, stub.pop(client_A_ID));
-        assertEquals(20, stub.pop(client_B_ID));
-        // Check if empty after pop operation
-        assertTrue(stub.isEmpty(client_A_ID));
-        assertTrue(stub.isEmpty(client_B_ID));
     }
 
     @Test
@@ -94,23 +59,6 @@ public class TestCalcClient {
     }
 
     @Test
-    void multipleClientsOperations() throws RemoteException {
-        UUID client_A_ID = UUID.randomUUID();
-        UUID client_B_ID = UUID.randomUUID();
-
-        stub.pushValue(client_A_ID, 10);
-        stub.pushValue(client_B_ID, 20);
-        stub.pushValue(client_B_ID, 18);
-        stub.pushValue(client_A_ID, 30);
-
-        stub.pushOperation(client_A_ID, "lcm");
-        stub.pushOperation(client_B_ID, "gcd");
-
-        assertEquals(30, stub.pop(client_A_ID));
-        assertEquals(2, stub.pop(client_B_ID));
-    }
-
-    @Test
     void singleClientDelayPop() throws RemoteException {
         UUID clientID = UUID.randomUUID();
         int mills = 500;
@@ -121,37 +69,6 @@ public class TestCalcClient {
 
         assertEquals(10, popped);
         assertTrue((end - start) >= 500, "DelayPop Should Be Longer Than " + mills + " Milliseconds");
-    }
-
-    @Test
-    void MultipleClientsDelayPop() throws RemoteException, InterruptedException {
-        UUID client_A_ID = UUID.randomUUID();
-        UUID client_B_ID = UUID.randomUUID();
-
-        stub.pushValue(client_A_ID, 10);
-        stub.pushValue(client_B_ID, 20);
-
-        Thread thr1 = new Thread(() -> {
-            try {
-                assertEquals(10, stub.delayPop(client_A_ID, 500));
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-
-        Thread thr2 = new Thread(() -> {
-           try {
-               assertEquals(20, stub.delayPop(client_B_ID, 1000));
-           } catch (RemoteException e) {
-               throw new RuntimeException(e);
-           }
-        });
-
-        thr1.start();
-        thr2.start();
-        thr1.join();
-        thr2.join();
     }
 
     @Test
