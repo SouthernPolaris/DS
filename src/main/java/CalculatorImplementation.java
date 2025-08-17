@@ -17,12 +17,11 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
     public void pushValue(UUID clientID, int value) throws RemoteException {
         Stack<Integer> stack = getStack(clientID);
         stack.push(value);
-        System.out.println("[SERVER] - Client " + clientID + " pushed: " + value);
+        System.out.println("[SERVER] - Client " + clientID + " || pushed: " + value);
     }
 
     public void pushOperation(UUID clientID, String operation) throws RemoteException {
         Stack<Integer> stack = getStack(clientID);
-        System.out.println("[SERVER] - Operation Called: " + operation);
         int res = 0;
 
         switch (operation) {
@@ -52,7 +51,6 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
                 }
                 break;
             case "lcm":
-//                res = 1;
                 if (!stack.empty()) {
                     res = stack.pop();
                     while (!stack.empty()) {
@@ -65,13 +63,18 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
 
         stack.push(res);
 
-        System.out.println("[SERVER] - Client " + clientID + " performed " + operation + "/ Res: " + res);
+        System.out.println("[SERVER] - Client " + clientID + " || " + operation + " || Res: " + res);
     }
 
     public int pop(UUID clientID) throws RemoteException {
         Stack<Integer> stack = getStack(clientID);
+
+        if (stack.isEmpty()) {
+            throw new RemoteException("[SERVER] - Client " + clientID + " || Tried popping from empty stack");
+        }
+
         int toPop = stack.pop();
-        System.out.println("[SERVER] - Client " + clientID + " popping " + toPop + " from calculator");
+        System.out.println("[SERVER] - Client " + clientID + " || Popped " + toPop + " from its calculator stack");
         return toPop;
     }
 
@@ -81,13 +84,12 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
     }
 
     public int delayPop(UUID clientID, int millis) throws RemoteException {
-        Stack<Integer> stack = getStack(clientID);
         try {
             Thread.sleep(millis);
-            System.out.println("[SERVER] - " + Thread.currentThread().getName() + " is going to sleep for " + millis + " milliseconds");
+            System.out.println("[SERVER] - Client " + clientID + " || delayPop called || " + Thread.currentThread().getName() + " sleeping for " + millis + " milliseconds");
         }
         catch (InterruptedException e) {
-            throw new RemoteException("[SERVER] - Interruption", e);
+            throw new RemoteException("[SERVER] - Client " + clientID + " || Interruption", e);
         }
         return pop(clientID);
     }
@@ -101,7 +103,7 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
 
     public void printStack(UUID clientID) throws RemoteException {
         Stack<Integer> stack = getStack(clientID);
-        System.out.println("[SERVER] - Client " + clientID + " printing stack");
+        System.out.println("[SERVER] - Client " + clientID + " || printing stack");
 
         for (Integer integer : stack) {
             System.out.println(integer);

@@ -20,6 +20,7 @@ public class CalculatorClient {
         while (true) {
             String op = inptScanner.nextLine();
             if (!parseCmd(op)) {
+                inptScanner.close();
                 break;
             }
         }

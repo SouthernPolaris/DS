@@ -153,4 +153,17 @@ public class TestCalcClient {
         thr1.join();
         thr2.join();
     }
+
+    @Test
+    void emptyPop() throws RemoteException {
+        UUID clientID = UUID.randomUUID();
+
+        assertTrue(stub.isEmpty(clientID));
+
+        RemoteException thrownException = assertThrows(RemoteException.class, () -> {
+            stub.pop(clientID);
+        });
+
+        assertTrue(thrownException.getMessage().contains("empty stack"));
+    }
 }
