@@ -4,8 +4,16 @@ import java.util.*;
 
 public class CalculatorImplementation extends UnicastRemoteObject implements Calculator {
 
+    /*
+     * ----------BONUS MARK-----------
+     * Maps a client ID to a specific stack
+     */
     private final Map<UUID, Stack<Integer>> clientStacks = new HashMap<UUID, Stack<Integer>>();
 
+    /*
+     * Returns the stack of a client
+     * Creates a stack if it doesn't exist
+     */
     private Stack<Integer> getStack(UUID clientId) {
         return clientStacks.computeIfAbsent(clientId, id -> new Stack<>());
     }
@@ -14,12 +22,18 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
         super();
     }
 
+    /*
+     * Pushes a value onto the client's stack
+     */
     public void pushValue(UUID clientID, int value) throws RemoteException {
         Stack<Integer> stack = getStack(clientID);
         stack.push(value);
         System.out.println("[SERVER] - Client " + clientID + " || pushed: " + value);
     }
 
+    /*
+     * Performs an operation (min/max/lcm/gcd) for a client's stack
+     */
     public void pushOperation(UUID clientID, String operation) throws RemoteException {
         Stack<Integer> stack = getStack(clientID);
         int res = 0;
@@ -66,6 +80,10 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
         System.out.println("[SERVER] - Client " + clientID + " || " + operation + " || Res: " + res);
     }
 
+    /*
+     * Pops an item from a client stack
+     * Throws error if no item is present
+     */
     public int pop(UUID clientID) throws RemoteException {
         Stack<Integer> stack = getStack(clientID);
 
@@ -78,11 +96,18 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
         return toPop;
     }
 
+    /*
+     * Checks if stack is empty
+     */
     public boolean isEmpty(UUID clientID) throws RemoteException {
         Stack<Integer> stack = getStack(clientID);
         return stack.isEmpty();
     }
 
+    /*
+     * Delays a pop by putting the current thread of a client to sleep for certain milliseconds
+     * Each thread is 1-1 per client so it does not impede on other client's operations
+     */
     public int delayPop(UUID clientID, int millis) throws RemoteException {
         try {
             Thread.sleep(millis);
@@ -94,6 +119,9 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
         return pop(clientID);
     }
 
+    /*
+     * Helper function for calculating gcd
+     */
     private int gcd(int a, int b) throws RemoteException {
         if (b == 0) {
             return a;
@@ -101,6 +129,9 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
         return gcd(b, a % b);
     }
 
+    /*
+    * Debug function for printing the current stack of a client
+    */ 
     public void printStack(UUID clientID) throws RemoteException {
         Stack<Integer> stack = getStack(clientID);
         System.out.println("[SERVER] - Client " + clientID + " || printing stack");
