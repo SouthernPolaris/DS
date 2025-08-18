@@ -1,11 +1,14 @@
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
+/*
+ * Server for the Calculator RMI
+ */
 public class CalculatorServer {
     public static void main(String[] args) {
         try {
             Calculator myCalc = new CalculatorImplementation();
-
+            // Connect to port 8080 (arbitrary)
             Registry registry = LocateRegistry.createRegistry(8080);
 
             registry.rebind("CalculatorDistributed", myCalc);

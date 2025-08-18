@@ -7,11 +7,18 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.UUID;
 
+/*
+ * Tests for single client uses
+ */
 public class TestCalcClient {
     private static Calculator stub;
 
+    /*
+     * Creates a server
+     */
     @BeforeAll
     static void createServer() throws Exception {
+        // Create registry on port 1099 (arbitrary)
         Registry registry = LocateRegistry.createRegistry(1099);
         Calculator distributedCalc = new CalculatorImplementation();
 
@@ -20,6 +27,9 @@ public class TestCalcClient {
 
     }
 
+    /*
+     * Test for push/pop for the client
+     */
     @Test
     void singleClientPushPop() throws RemoteException {
         UUID clientID = UUID.randomUUID();
@@ -33,6 +43,9 @@ public class TestCalcClient {
         assertEquals(10, secondPop);
     }
 
+    /*
+     * Test for running operations (min/max/lcm/gcd)
+     */
     @Test
     void singleClientOperations() throws RemoteException {
         UUID clientID = UUID.randomUUID();
@@ -58,6 +71,7 @@ public class TestCalcClient {
         assertEquals(-7, stub.pop(clientID));
     }
 
+    // Tests for delay pops by timing the difference between the pop start and end
     @Test
     void singleClientDelayPop() throws RemoteException {
         UUID clientID = UUID.randomUUID();
@@ -68,9 +82,13 @@ public class TestCalcClient {
         long end = System.currentTimeMillis();
 
         assertEquals(10, popped);
+        // Compare greater than or equal-to, accounting for extra execution time
         assertTrue((end - start) >= 500, "DelayPop Should Be Longer Than " + mills + " Milliseconds");
     }
 
+    /*
+     * Check for proper throwing when popping from empty stack
+     */
     @Test
     void emptyPop() throws RemoteException {
         UUID clientID = UUID.randomUUID();

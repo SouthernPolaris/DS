@@ -10,11 +10,15 @@ import java.util.UUID;
 public class MultipleClientTest {
     private static Calculator stub;
 
+    // Initialise 4 clients (to test for more than 3 clients)
     private static final UUID client_A_ID = UUID.randomUUID();
     private static final UUID client_B_ID = UUID.randomUUID();
     private static final UUID client_C_ID = UUID.randomUUID();
     private static final UUID client_D_ID = UUID.randomUUID();
 
+    /*
+     * Helper function for concurrency testing and error handling
+     */
     private Runnable createThread(UUID clientID, int expectedVal, int delayMS, Throwable[] multithreadExceptions, int idx) {
         return () -> {
             try {
@@ -26,6 +30,7 @@ public class MultipleClientTest {
         };
     }
 
+    // Clear a stack for a client
     private void clearClientStack(UUID clientID) throws RemoteException {
         if (!stub.isEmpty(clientID)) {        
             stub.pushOperation(clientID, "min");
@@ -33,6 +38,7 @@ public class MultipleClientTest {
         }
     }
 
+    // Clears all stacks, runs before each Test
     private void clearAllStacks() throws RemoteException {
         clearClientStack(client_A_ID);
         clearClientStack(client_B_ID);
@@ -40,8 +46,10 @@ public class MultipleClientTest {
         clearClientStack(client_D_ID);
     }
 
+    /*
+     * Create server before each test
+     */
     @BeforeAll
- 
     static void createServer() throws Exception {
         Registry registry = LocateRegistry.createRegistry(8080);
         Calculator distributedCalc = new CalculatorImplementation();
@@ -51,8 +59,10 @@ public class MultipleClientTest {
 
     }
 
+    /*
+    * Tests for independence of multiple stacks
+    */ 
     @Test
-    // Tests for independence of multiple stacks
     void multipleClientsIndependence() throws RemoteException {
         clearAllStacks();
 
@@ -71,6 +81,9 @@ public class MultipleClientTest {
         assertEquals(0, stub.pop(client_D_ID));
     }
 
+    /*
+     * Tests for push/pop for multiple clients
+     */
     @Test
     void MultipleClientsPushPop() throws RemoteException {
         clearAllStacks();
@@ -126,6 +139,10 @@ public class MultipleClientTest {
         assertEquals(10, stub.pop(client_D_ID));
     }
 
+    /*
+     * Test for delay pop
+     * Uses multithreading to test for concurrency as well
+     */
     @Test
     void MultipleClientsDelayPop() throws RemoteException, InterruptedException {
         clearAllStacks();
@@ -152,6 +169,7 @@ public class MultipleClientTest {
         thr3.join();
         thr4.join();
 
+        // Tests for throwables to fail tests as using assert throwable overrides assertEqual checks
         for (Throwable e : multithreadExceptions) {
             if (e != null) {
                 fail();
