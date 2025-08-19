@@ -64,6 +64,7 @@ java -cp target/classes CalculatorClient
 
 
 ## How to Test
+Please close all terminal sessions running on port 8080 (e.g. the Server) before running tests
 ### Using Makefile
 1. Compile the code
 ```bash

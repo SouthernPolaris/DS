@@ -50,14 +50,22 @@ public class CalculatorClient {
                 break;
             case "pop":
                 // Basic pop from stack of client
-                int poppedNum = stub.pop(clientID);
-                System.out.println("[CLIENT] - Popped: " + poppedNum);
+                try {
+                    int poppedNum = stub.pop(clientID);
+                    System.out.println("[CLIENT] - Popped: " + poppedNum);
+                } catch (Exception e) {
+                    System.out.println("[CLIENT] - Empty Stack, Cannot Pop");
+                }
                 break;
             case "delayPop":
                 // Convert second word to int and call delayPop
-                int delay = Integer.parseInt(ops[1]);
-                int delayedPopNum = stub.delayPop(clientID, delay);
-                System.out.println("[CLIENT] - Popped with delay: " + delayedPopNum);
+                try {
+                    int delay = Integer.parseInt(ops[1]);
+                    int delayedPopNum = stub.delayPop(clientID, delay);
+                    System.out.println("[CLIENT] - Popped with delay: " + delayedPopNum);
+                } catch (Exception e) {
+                    System.out.println("[CLIENT] - Empty Stack, Cannot Delay Pop");
+                }
                 break;
             case "op":
                 // Checks for operation type in second word of input
