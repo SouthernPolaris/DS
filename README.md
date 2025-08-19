@@ -62,6 +62,21 @@ java -cp target/classes CalculatorServer
 java -cp target/classes CalculatorClient
 ```
 
+### Build with javac
+1. Run the following to compile:
+```bash
+javac -d target/classes $(find src/main/java -name "*.java")
+```
+2. Run the server
+```bash
+java -cp target/classes CalculatorServer
+```
+3. Run the client in a separate terminal (as many as needed in individual terminals)
+```bash
+java -cp target/classes CalculatorClient
+```
+
+
 
 ## How to Test
 Please close all terminal sessions running on port 8080 (e.g. the Server) before running tests
