@@ -97,15 +97,14 @@ public class CalculatorClient {
      * Print help text on what to input
      */
     private void printHelp() {
-        String actionInfoLine = """
-                Choose Operation:
-                push <integer value>
-                pop
-                delayPop <milliseconds>
-                op <min/max/lcm/gcd>
-                exit
-                help
-                """;
+        String actionInfoLine = "\n"+
+                "Choose Operation:\n" +
+                "push <integer value>\n" +
+                "pop\n" +
+                "delayPop <milliseconds>\n" +
+                "op <min/max/lcm/gcd>\n" +
+                "exit\n" +
+                "help\n";
         System.out.println(actionInfoLine);
     }
 
